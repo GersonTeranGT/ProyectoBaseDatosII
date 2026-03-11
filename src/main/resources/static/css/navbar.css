@@ -1,0 +1,209 @@
+.navbar {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 100, 0, 0.05);
+    border-bottom: 2px solid rgba(16, 185, 129, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.navbar-scrolled {
+    box-shadow: 0 4px 20px rgba(0, 100, 0, 0.15);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.02);
+}
+
+.navbar-logo {
+    width: 40px;
+    height: 40px;
+    color: #059669;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover .navbar-logo {
+    color: #047857;
+    transform: rotate(5deg);
+}
+
+.navbar-brand-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    position: relative;
+    color: #374151;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #059669, #10b981);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #059669;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.nav-link:hover::before {
+    width: 80%;
+}
+
+.nav-link.active {
+    color: #059669;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.nav-link.active::before {
+    width: 80%;
+}
+
+.nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover .nav-icon {
+    color: #059669;
+    transform: translateY(-1px);
+}
+
+.navbar-toggler {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.hamburger {
+    width: 24px;
+    height: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #374151;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler.active .hamburger span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+.navbar-toggler.active .hamburger span:nth-child(2) {
+    opacity: 0;
+}
+
+.navbar-toggler.active .hamburger span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.navbar-nav.show {
+    animation: slideIn 0.3s ease forwards;
+}
+
+@media (max-width: 768px) {
+    .navbar-toggler {
+        display: block;
+    }
+
+    .navbar-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-bottom: 2px solid #059669;
+    }
+
+    .navbar-nav.show {
+        display: flex;
+    }
+
+    .nav-link {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+
+    .nav-link::before {
+        display: none;
+    }
+
+    .nav-link:hover {
+        background: rgba(16, 185, 129, 0.1);
+        transform: translateX(5px);
+    }
+}

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Páramo</title>
+    <!-- favicon -->
+    <link rel="icon" th:href="@{images/vaca.png}">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS Personalizados -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+
+    <!-- Swiper CSS para el carrusel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+<body>
+<!-- Navbar fragment -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Contenido principal simplificado -->
+<main class="main-content">
+    <div class="container mx-auto px-4">
+
+        <!-- Hero Section con fondo degradado -->
+        <section class="hero-section text-center py-16 md:py-24 fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4" th:text="${titulo}">
+                Sistema de Gestión Ganadera
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10" th:text="${bienvenida}">
+                Administración básica de bovinos
+            </p>
+
+            <!-- Botón principal destacado -->
+            <div class="flex justify-center">
+                <a th:href="@{/bovinos}"
+                   class="group relative bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800
+                              text-white font-bold py-4 px-10 rounded-full text-lg shadow-xl
+                              transform transition-all duration-300 hover:scale-105
+                              flex items-center justify-center space-x-3">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span>Gestionar Bovinos</span>
+                    <div class="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Carrusel de imágenes -->
+        <section class="carousel-section py-12 fade-in" style="animation-delay: 0.3s">
+            <h2 class="text-3xl font-semibold text-center text-gray-800 mb-8">Nuestro Ganado</h2>
+
+            <div class="swiper mySwiper max-w-5xl mx-auto px-4">
+                <div class="swiper-wrapper">
+                    <!-- Slide 1 - Imagen de ganado Holstein -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <img src="https://i.postimg.cc/xjXQ93Mk/ganado-holstein.jpg"
+                                 alt="Ganado Holstein"
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ganado Holstein</h3>
+                                <p class="text-gray-600">Excelente producción lechera</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2 - Imagen de ganado Jersey -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <img src="https://i.postimg.cc/wx1z9QLx/ganado-jersey.jpg"
+                                 alt="Ganado Jersey"
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ganado Jersey</h3>
+                                <p class="text-gray-600">Leche de alta calidad</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3 - Imagen de ganado Angus -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <img src="https://i.postimg.cc/MZnwzmVT/ganado-angus.jpg"
+                                 alt="Ganado Angus"
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ganado Angus</h3>
+                                <p class="text-gray-600">Excelente para carne</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 4 - Imagen de ganado Hereford -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <img src="https://i.postimg.cc/h4XnK1Tf/ganado-hereford.jpg"
+                                 alt="Ganado Hereford"
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ganado Hereford</h3>
+                                <p class="text-gray-600">Resistente y adaptable</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 5 - Imagen adicional de ganado en campo -->
+                    <div class="swiper-slide">
+                        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <img src="https://i.postimg.cc/8k7GTmMc/ganado-pastoreo.jpg"
+                                 alt="Ganado en el campo"
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Ganado en Pastoreo</h3>
+                                <p class="text-gray-600">Crianza saludable y natural</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación del carrusel -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+
+                <!-- Paginación -->
+                <div class="swiper-pagination"></div>
+            </div>
+        </section>
+
+        <!-- Sección de características rápidas (opcional) -->
+        <section class="features-section py-12 fade-in" style="animation-delay: 0.6s">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="text-center p-6">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Fácil de usar</h3>
+                    <p class="text-gray-600">Interfaz intuitiva para gestión diaria</p>
+                </div>
+
+                <div class="text-center p-6">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Control total</h3>
+                    <p class="text-gray-600">Seguimiento individual de cada bovino</p>
+                </div>
+
+                <div class="text-center p-6">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800">Reportes claros</h3>
+                    <p class="text-gray-600">Estadísticas y datos importantes</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<!-- Scripts de los fragments -->
+<div th:replace="~{fragments/navbar :: navbar-scripts}"></div>
+<div th:replace="~{fragments/footer :: footer-scripts}"></div>
+
+<!-- Inicialización del carrusel -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var swiper = new Swiper('.mySwiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: true,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                },
+                1024: {
+                    slidesPerView: 3,
+                },
+            },
+        });
+    });
+</script>
+
+<!-- Script para pasar variable de página actual -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentPage = /*[[${currentPage}]]*/ 'home';
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+</head>
+<body>
+<footer th:fragment="footer" class="footer">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 footer-content">
+        <!-- Solo una sección central con información básica -->
+        <div class="text-center">
+            <!-- Logo pequeño -->
+            <div class="flex justify-center mb-4">
+                <img th:src="@{/images/vaca.png}" alt="Logo El Páramo" class="navbar-logo">
+            </div>
+
+            <!-- Nombre del sistema -->
+            <h3 class="text-white text-xl font-semibold mb-2">El Páramo</h3>
+
+            <!-- Descripción corta -->
+            <p class="text-gray-400 max-w-md mx-auto mb-6">
+                Sistema de Gestión Ganadera.
+            </p>
+        </div>
+
+        <!-- Footer inferior simplificado -->
+        <div class="footer-bottom">
+            <p>
+                &copy; <span th:text="${#dates.year(#dates.createNow())}">2024</span>
+                El Páramo - Todos los derechos reservados.
+            </p>
+            <p class="mt-2 text-sm">
+                Desarrollado con <span class="heart">❤️</span> para el campo
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Botón de scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="Volver arriba">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+</button>
+
+<script th:fragment="footer-scripts">
+    // Scroll to top functionality
+    window.addEventListener('scroll', function() {
+        const scrollBtn = document.getElementById('scrollTop');
+        if (window.scrollY > 500) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+    });
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Este head solo es para el diseño, no se incluirá en el fragmento -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+</head>
+<body>
+<nav th:fragment="navbar" class="navbar" id="mainNavbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <!-- Logo y marca -->
+            <a href="/" class="navbar-brand">
+                <img th:src="@{/images/vaca.png}" alt="Logo El Páramo" class="navbar-logo">
+                <span class="navbar-brand-text">El Páramo</span>
+            </a>
+
+            <!-- Botón menú móvil -->
+            <button class="navbar-toggler" id="navbarToggler" onclick="toggleMenu()">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+
+            <!-- Menú de navegación simplificado -->
+            <div class="navbar-nav" id="navbarNav">
+                <a href="/" class="nav-link" th:classappend="${currentPage == 'home' ? 'active' : ''}">
+                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Inicio
+                </a>
+
+                <a th:href="@{/bovinos}" class="nav-link" th:classappend="${currentPage == 'bovinos' ? 'active' : ''}">
+                    <img th:src="@{/images/animal.png}" alt="Icono de vaca" class="nav-icon">
+                    Bovinos
+                </a>
+
+                <a href="/bovinos/nuevo" class="nav-link" th:classappend="${currentPage == 'nuevo-bovino' ? 'active' : ''}">
+                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Agregar Bovino
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Script para el menú móvil -->
+<script th:fragment="navbar-scripts">
+    function toggleMenu() {
+        const nav = document.getElementById('navbarNav');
+        const toggler = document.getElementById('navbarToggler');
+        nav.classList.toggle('show');
+        toggler.classList.toggle('active');
+    }
+
+    // Cerrar menú al hacer click fuera
+    document.addEventListener('click', function(event) {
+        const nav = document.getElementById('navbarNav');
+        const toggler = document.getElementById('navbarToggler');
+        const isClickInside = nav.contains(event.target) || toggler.contains(event.target);
+
+        if (!isClickInside && nav.classList.contains('show')) {
+            nav.classList.remove('show');
+            toggler.classList.remove('active');
+        }
+    });
+
+    // Efecto de scroll en navbar
+    window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('mainNavbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
+        }
+    });
+</script>
+</body>
+</html>
