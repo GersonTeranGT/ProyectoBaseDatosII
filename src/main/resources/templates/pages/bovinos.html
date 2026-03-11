@@ -46,13 +46,15 @@
                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </div>
 
-            <select id="sexoFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+            <select id="sexoFilter"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                 <option value="">Todos los sexos</option>
                 <option value="Macho">Macho</option>
                 <option value="Hembra">Hembra</option>
             </select>
 
-            <select id="saludFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+            <select id="saludFilter"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                 <option value="">Todos los estados</option>
                 <option value="Saludable">Saludable</option>
                 <option value="En tratamiento">En tratamiento</option>
@@ -60,7 +62,8 @@
                 <option value="Crítico">Crítico</option>
             </select>
 
-            <button id="clearFilters" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+            <button id="clearFilters"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
                 <i class="fas fa-eraser mr-2"></i>
                 Limpiar filtros
             </button>
@@ -82,54 +85,62 @@
             </tr>
             </thead>
             <tbody id="bovinosTableBody">
-            <tr  class="hover:bg-gray-50">
-                <td class="font-medium text-gray-900" >1</td>
-                <td >HOL-001</td>
-                <td class="font-semibold" >Lola</td>
+            <tr th:each="bovino : ${bovinos}" th:class="${bovinoStat.odd} ? 'bg-gray-50' : ''"
+                class="hover:bg-gray-100">
+                <td class="font-medium text-gray-900" th:text="${bovino.id}">1</td>
+                <td th:text="${bovino.codigoArete}">HOL-001</td>
+                <td class="font-semibold" th:text="${bovino.nombreBovino}">Lola</td>
                 <td>
-                            <span  class="sexo-badge macho">
-                                <i class="fas fa-mars mr-1"></i>Macho
-                            </span>
-                    <span  class="sexo-badge hembra">
-                                <i class="fas fa-venus mr-1"></i>Hembra
-                            </span>
+            <span th:if="${bovino.sexo == 'Macho'}" class="sexo-badge macho">
+                <i class="fas fa-mars mr-1"></i>Macho
+            </span>
+                    <span th:if="${bovino.sexo == 'Hembra'}" class="sexo-badge hembra">
+                <i class="fas fa-venus mr-1"></i>Hembra
+            </span>
                 </td>
-                <td  class="font-medium">580.5 kg</td>
+                <td class="font-medium" th:text="${#numbers.formatDecimal(bovino.peso, 1, 1) + ' kg'}">580.5 kg</td>
                 <td>
-                            <span class="estado-badge">
-                                <span  class="saludable">
-                                    <i class="fas fa-check-circle mr-1"></i>Saludable
-                                </span>
-                                <span  class="tratamiento">
-                                    <i class="fas fa-medkit mr-1"></i>En tratamiento
-                                </span>
-                                <span  class="observacion">
-                                    <i class="fas fa-eye mr-1"></i>Observación
-                                </span>
-                                <span  class="critico">
-                                    <i class="fas fa-exclamation-triangle mr-1"></i>Crítico
-                                </span>
-                            </span>
+            <span th:switch="${bovino.estadoSalud}" class="estado-badge">
+                <span th:case="'Saludable'" class="saludable">
+                    <i class="fas fa-check-circle mr-1"></i>Saludable
+                </span>
+                <span th:case="'En tratamiento'" class="tratamiento">
+                    <i class="fas fa-medkit mr-1"></i>En tratamiento
+                </span>
+                <span th:case="'Observación'" class="observacion">
+                    <i class="fas fa-eye mr-1"></i>Observación
+                </span>
+                <span th:case="'Crítico'" class="critico">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>Crítico
+                </span>
+            </span>
                 </td>
                 <td>
                     <div class="acciones-container">
-                        <a
-                           class="btn-editar"
-                           >
+                        <a th:href="@{/bovinos/editar/{id}(id=${bovino.id})}" class="btn-editar">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a
-                           class="btn-ver"
-                           >
+                        <a th:href="@{/bovinos/ver/{id}(id=${bovino.id})}" class="btn-ver">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a
+                        <a th:href="@{/bovinos/eliminar/{id}(id=${bovino.id})}"
                            class="btn-eliminar"
-
                            onclick="return confirm('¿Estás seguro de eliminar este bovino?')">
                             <i class="fas fa-trash-alt"></i>
                         </a>
                     </div>
+                </td>
+            </tr>
+            </tr>
+            <tr th:if="${#lists.isEmpty(bovinos)}" id="noResultados">
+                <td colspan="7" class="text-center py-8 text-gray-500">
+                    <i class="fas fa-search text-4xl mb-3 block"></i>
+                    <span th:if="${searchFilter != null or sexoFilter != null or estadoSaludFilter != null}">
+                No se encontraron bovinos con los filtros aplicados
+            </span>
+                    <span th:unless="${searchFilter != null or sexoFilter != null or estadoSaludFilter != null}">
+                No hay bovinos registrados
+            </span>
                 </td>
             </tr>
             </tbody>
@@ -142,6 +153,7 @@
     </div>
 
     <!-- Tarjetas de estadísticas -->
+    <!-- Tarjetas de estadísticas -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-8">
         <div class="stat-card">
             <div class="stat-icon bg-blue-100 text-blue-600">
@@ -149,7 +161,7 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Total</span>
-                <span class="stat-value" th:text="${totalBovinos}">8</span>
+                <span class="stat-value" id="totalBovinos" th:text="${totalBovinos}">8</span>
             </div>
         </div>
 
@@ -159,7 +171,7 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Machos</span>
-                <span class="stat-value" th:text="${totalMachos}">2</span>
+                <span class="stat-value" id="totalMachos" th:text="${totalMachos}">2</span>
             </div>
         </div>
 
@@ -169,7 +181,7 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Hembras</span>
-                <span class="stat-value" th:text="${totalHembras}">6</span>
+                <span class="stat-value" id="totalHembras" th:text="${totalHembras}">6</span>
             </div>
         </div>
 
@@ -179,7 +191,7 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Saludables</span>
-                <span class="stat-value" th:text="${totalSaludables}">5</span>
+                <span class="stat-value" id="totalSaludables" th:text="${totalSaludables}">5</span>
             </div>
         </div>
 
@@ -189,12 +201,15 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Peso Prom.</span>
-                <span class="stat-value" th:text="${pesoPromedio} + ' kg'">583 kg</span>
+                <span class="stat-value" id="pesoPromedio" th:text="${pesoPromedio} + ' kg'">583 kg</span>
             </div>
         </div>
     </div>
 </main>
-
+<!-- Campos ocultos para mantener los filtros -->
+<input type="hidden" id="searchFilter" th:value="${searchFilter}">
+<input type="hidden" id="sexoFilterHidden" th:value="${sexoFilter}">
+<input type="hidden" id="estadoSaludFilterHidden" th:value="${estadoSaludFilter}">
 
 <!-- Footer fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
