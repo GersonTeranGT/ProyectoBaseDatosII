@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Bovino - RanchoAdmin</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- CSS del formulario -->
+    <link rel="stylesheet" href="/css/formBovino.css">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
+
+
+</head>
+<body class="bg-gray-50">
+<!-- Navbar fragment -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Contenido principal -->
+<main class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Título -->
+    <div class="mb-8 text-center md:text-left">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
+            <i class="fas fa-pen-alt text-green-600 mr-3"></i>
+            Registrar Nuevo Bovino
+        </h1>
+        <p class="text-gray-600 mt-2">Completa los datos del bovino para registrarlo en el sistema</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-container">
+        <form id="bovinoForm" class="bovino-form" onsubmit="return guardarBovino(event)">
+
+            <!-- Campo: Código de Arete -->
+            <div class="form-group">
+                <label for="codigoArete" class="form-label">
+                    <i class="fas fa-tag mr-2 text-green-600"></i>
+                    Código de Arete
+                </label>
+                <div class="relative">
+                    <input type="text"
+                           id="codigoArete"
+                           name="codigoArete"
+                           class="form-input"
+                           placeholder="Ej: HOL-001, ANG-002"
+                           required>
+                    <div class="input-icon">
+                        <i class="fas fa-check-circle text-green-500" style="display: none;"></i>
+                        <i class="fas fa-exclamation-circle text-red-500" style="display: none;"></i>
+                    </div>
+                </div>
+                <div class="form-error" id="errorCodigoArete"></div>
+                <div class="form-helper">Formato sugerido: RAZA-001 (Ej: HOL-001, ANG-002)</div>
+            </div>
+
+            <!-- Campo: Nombre del Bovino -->
+            <div class="form-group">
+                <label for="nombreBovino" class="form-label">
+                    <i class="fas fa-cow mr-2 text-green-600"></i>
+                    Nombre del Bovino
+                </label>
+                <div class="relative">
+                    <input type="text"
+                           id="nombreBovino"
+                           name="nombreBovino"
+                           class="form-input"
+                           placeholder="Ej: Lola, Manchas, Torito"
+                           required>
+                </div>
+                <div class="form-error" id="errorNombre"></div>
+            </div>
+
+            <!-- Campo: Sexo -->
+            <div class="form-group">
+                <label for="sexo" class="form-label">
+                    <i class="fas fa-venus-mars mr-2 text-green-600"></i>
+                    Sexo
+                </label>
+                <div class="sexo-options">
+                    <label class="sexo-option">
+                        <input type="radio" name="sexo" value="Macho" class="hidden" required>
+                        <div class="sexo-card macho">
+                            <i class="fas fa-mars text-3xl mb-2"></i>
+                            <span class="text-lg font-medium">Macho</span>
+                        </div>
+                    </label>
+                    <label class="sexo-option">
+                        <input type="radio" name="sexo" value="Hembra" class="hidden" required>
+                        <div class="sexo-card hembra">
+                            <i class="fas fa-venus text-3xl mb-2"></i>
+                            <span class="text-lg font-medium">Hembra</span>
+                        </div>
+                    </label>
+                </div>
+                <div class="form-error" id="errorSexo"></div>
+            </div>
+
+            <!-- Campo: Peso -->
+            <div class="form-group">
+                <label for="peso" class="form-label">
+                    <i class="fas fa-weight-scale mr-2 text-green-600"></i>
+                    Peso (kg)
+                </label>
+                <div class="relative">
+                    <input type="number"
+                           id="peso"
+                           name="peso"
+                           step="0.01"
+                           min="0"
+                           max="2000"
+                           class="form-input pl-12"
+                           placeholder="0.00"
+                           required>
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">kg</span>
+                </div>
+                <div class="form-error" id="errorPeso"></div>
+            </div>
+
+            <!-- Campo: Estado de Salud -->
+            <div class="form-group">
+                <label for="estadoSalud" class="form-label">
+                    <i class="fas fa-heartbeat mr-2 text-green-600"></i>
+                    Estado de Salud
+                </label>
+                <div class="relative">
+                    <select id="estadoSalud" name="estadoSalud" class="form-input appearance-none" required>
+                        <option value="" disabled selected>Selecciona un estado</option>
+                        <option value="Saludable">Saludable</option>
+                        <option value="En tratamiento">En tratamiento</option>
+                        <option value="Observación">Observación</option>
+                        <option value="Crítico">Crítico</option>
+                    </select>
+                    <div class="absolute right-4 top-3 text-gray-400 pointer-events-none">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="form-error" id="errorEstadoSalud"></div>
+            </div>
+
+            <!-- Campos opcionales adicionales (para enriquecer el formulario) -->
+            <div class="optional-fields">
+                <div class="form-group">
+                    <label for="raza" class="form-label">
+                        <i class="fas fa-paw mr-2 text-green-600"></i>
+                        Raza (opcional)
+                    </label>
+                    <input type="text" id="raza" name="raza" class="form-input" placeholder="Ej: Holstein, Angus, Jersey">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaNacimiento" class="form-label">
+                        <i class="fas fa-calendar mr-2 text-green-600"></i>
+                        Fecha de Nacimiento (opcional)
+                    </label>
+                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="color" class="form-label">
+                        <i class="fas fa-palette mr-2 text-green-600"></i>
+                        Color (opcional)
+                    </label>
+                    <input type="text" id="color" name="color" class="form-input" placeholder="Ej: Blanco y Negro, Marrón">
+                </div>
+
+                <div class="form-group">
+                    <label for="observaciones" class="form-label">
+                        <i class="fas fa-comment mr-2 text-green-600"></i>
+                        Observaciones (opcional)
+                    </label>
+                    <textarea id="observaciones" name="observaciones" rows="3" class="form-input" placeholder="Notas adicionales..."></textarea>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-guardar" id="btnGuardar">
+                    <i class="fas fa-save mr-2"></i>
+                    Guardar Bovino
+                </button>
+
+                <a href="/bovinos" class="btn btn-cancelar">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+            </div>
+
+            <!-- Mensaje de confirmación (se muestra al enviar) -->
+            <div id="mensajeConfirmacion" class="hidden"></div>
+        </form>
+    </div>
+</main>
+
+<!-- Footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/js/bovinos.js}"></script>
+
+<!-- Scripts de los fragments -->
+<div th:replace="~{fragments/navbar :: navbar-scripts}"></div>
+<div th:replace="~{fragments/footer :: footer-scripts}"></div>
+
+<!-- JavaScript del formulario -->
+<script src="/js/formBovino.js"></script>
+</body>
+</html>

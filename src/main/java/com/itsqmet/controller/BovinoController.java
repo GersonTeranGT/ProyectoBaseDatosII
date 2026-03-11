@@ -52,8 +52,8 @@ public class BovinoController {
     public String nuevoBovino(Model model) {
         model.addAttribute("titulo", "Agregar Nuevo Bovino");
         model.addAttribute("currentPage", "nuevo-bovino");
-        model.addAttribute("bovino", new Bovino());
-        return "bovinos/form";
+        // No necesitas pasar un objeto bovino
+        return "pages/formBovinos";
     }
 
     @GetMapping("/editar/{id}")
