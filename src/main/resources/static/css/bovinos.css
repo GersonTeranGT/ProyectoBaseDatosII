@@ -360,3 +360,52 @@
     z-index: 10;
     margin-bottom: 0.5rem;
 }
+/* Estilo para la columna de fecha de nacimiento */
+.bovinos-table td:nth-child(6) {
+    font-size: 0.9rem;
+    color: #4b5563;
+    white-space: nowrap;
+    font-family: 'Inter', monospace;
+}
+
+/* Para fechas vacías */
+.bovinos-table td:nth-child(6) .text-gray-400 {
+    font-style: italic;
+}
+
+/* Responsive: en móviles, mostrar la fecha en formato más pequeño */
+@media (max-width: 768px) {
+    .bovinos-table td:nth-child(6) {
+        font-size: 0.8rem;
+    }
+
+    /* Ocultar fecha en pantallas muy pequeñas si es necesario */
+    @media (max-width: 480px) {
+        .bovinos-table th:nth-child(6),
+        .bovinos-table td:nth-child(6) {
+            display: none;
+        }
+    }
+}
+
+/* Tooltip para mostrar la fecha original de PostgreSQL (opcional) */
+.bovinos-table td:nth-child(6) {
+    position: relative;
+    cursor: help;
+}
+
+.bovinos-table td:nth-child(6):hover::after {
+    content: attr(data-original);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 0.25rem;
+}

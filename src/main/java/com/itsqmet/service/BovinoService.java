@@ -71,7 +71,6 @@ public class BovinoService {
 
     // Búsqueda avanzada con filtros
     public List<Bovino> buscarConFiltros(String nombre, String sexo, String estadoSalud) {
-        // Manejar cadenas vacías como null para la consulta
         String nombreParam = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
         String sexoParam = (sexo != null && !sexo.trim().isEmpty()) ? sexo.trim() : null;
         String estadoParam = (estadoSalud != null && !estadoSalud.trim().isEmpty()) ? estadoSalud.trim() : null;

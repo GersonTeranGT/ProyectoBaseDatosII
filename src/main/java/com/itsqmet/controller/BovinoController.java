@@ -22,11 +22,8 @@ public class BovinoController {
 
     @GetMapping
     public String listarBovinos(Model model) {
-
-        // Cargar todos los bovinos inicialmente
         List<Bovino> listaBovinos = bovinoService.listarTodos();
 
-        // Calcular estadísticas
         long totalMachos = bovinoService.contarMachos();
         long totalHembras = bovinoService.contarHembras();
         long totalSaludables = bovinoService.contarSaludables();
@@ -119,32 +116,20 @@ public class BovinoController {
     public List<Bovino> filtrarBovinos(@RequestParam(required = false) String search,
                                        @RequestParam(required = false) String sexo,
                                        @RequestParam(required = false) String estadoSalud) {
-
-        System.out.println("Filtrando - search: '" + search + "', sexo: '" + sexo + "', estado: '" + estadoSalud + "'");
-
         try {
             List<Bovino> resultados;
 
-            // Si hay búsqueda por texto, priorizar ese filtro
             if (search != null && !search.trim().isEmpty()) {
                 resultados = bovinoService.buscarPorNombreOCodigo(search.trim());
-            }
-            // Si hay filtros de sexo y/o estado
-            else if ((sexo != null && !sexo.isEmpty()) || (estadoSalud != null && !estadoSalud.isEmpty())) {
+            } else if ((sexo != null && !sexo.isEmpty()) || (estadoSalud != null && !estadoSalud.isEmpty())) {
                 resultados = bovinoService.buscarConFiltros(null, sexo, estadoSalud);
-            }
-            // Si no hay filtros, mostrar todos
-            else {
+            } else {
                 resultados = bovinoService.listarTodos();
             }
 
-            System.out.println("Resultados encontrados: " + resultados.size());
             return resultados;
-
         } catch (Exception e) {
-            System.err.println("Error al filtrar: " + e.getMessage());
-            e.printStackTrace();
-            return List.of(); // Retornar lista vacía en caso de error
+            return List.of();
         }
     }
 

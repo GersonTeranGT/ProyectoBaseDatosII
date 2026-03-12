@@ -7,8 +7,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const codigoArete = document.getElementById('codigoArete');
     const nombre = document.getElementById('nombreBovino');
     const peso = document.getElementById('peso');
+    const fechaNacimiento = document.getElementById('fechaNacimiento'); // NUEVO
     const estadoSalud = document.getElementById('estadoSalud');
     const radiosSexo = document.querySelectorAll('input[name="sexo"]');
+
+    // Crear elementos de error para fecha si no existen
+    if (fechaNacimiento && !document.getElementById('errorFechaNacimiento')) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'errorFechaNacimiento';
+        errorDiv.className = 'form-error';
+        fechaNacimiento.parentElement.parentElement.appendChild(errorDiv);
+    }
 
     // Validación en tiempo real
     if (codigoArete) {
@@ -26,6 +35,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (peso) {
         peso.addEventListener('input', function() {
             validarPeso(this.value);
+        });
+    }
+
+    // NUEVO: Validación de fecha
+    if (fechaNacimiento) {
+        fechaNacimiento.addEventListener('change', function() {
+            validarFechaNacimiento(this.value);
+        });
+
+        // Validar también al perder el foco
+        fechaNacimiento.addEventListener('blur', function() {
+            validarFechaNacimiento(this.value);
         });
     }
 
@@ -55,14 +76,15 @@ document.addEventListener('DOMContentLoaded', function() {
             nombreBovino: document.getElementById('nombreBovino').value,
             sexo: document.querySelector('input[name="sexo"]:checked')?.value,
             peso: parseFloat(document.getElementById('peso').value),
+            fechaNacimiento: document.getElementById('fechaNacimiento')?.value || '', // NUEVO
             estadoSalud: document.getElementById('estadoSalud').value,
             raza: document.getElementById('raza')?.value || '',
-            fechaNacimiento: document.getElementById('fechaNacimiento')?.value || '',
             color: document.getElementById('color')?.value || '',
             observaciones: document.getElementById('observaciones')?.value || ''
         };
 
         console.log('Datos del formulario:', formData);
+        console.log('Fecha de nacimiento (formato PostgreSQL):', formData.fechaNacimiento);
 
         // Simular envío (aquí iría la petición al servidor)
         setTimeout(function() {
@@ -72,9 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Restaurar botón
             btnGuardar.disabled = false;
             btnGuardar.innerHTML = '<i class="fas fa-save mr-2"></i> Guardar Bovino';
-
-            // Opcional: limpiar formulario
-            // form.reset();
 
             // Redirigir después de 2 segundos
             setTimeout(function() {
@@ -167,6 +186,49 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
+    // NUEVA FUNCIÓN: Validar fecha de nacimiento
+    function validarFechaNacimiento(valor) {
+        const errorDiv = document.getElementById('errorFechaNacimiento');
+
+        if (!valor) {
+            mostrarError('fechaNacimiento', 'La fecha de nacimiento es obligatoria', errorDiv);
+            return false;
+        }
+
+        // Validar formato YYYY-MM-DD
+        const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!fechaRegex.test(valor)) {
+            mostrarError('fechaNacimiento', 'Formato inválido. Use YYYY-MM-DD (Ej: 2024-05-15)', errorDiv);
+            return false;
+        }
+
+        // Validar que sea una fecha real
+        const fecha = new Date(valor + 'T00:00:00');
+        if (isNaN(fecha.getTime())) {
+            mostrarError('fechaNacimiento', 'La fecha no es válida', errorDiv);
+            return false;
+        }
+
+        // Validar que no sea una fecha futura
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        if (fecha > hoy) {
+            mostrarError('fechaNacimiento', 'La fecha de nacimiento no puede ser futura', errorDiv);
+            return false;
+        }
+
+        // Validar que no sea demasiado antigua (más de 20 años)
+        const hace20Anios = new Date();
+        hace20Anios.setFullYear(hace20Anios.getFullYear() - 20);
+        if (fecha < hace20Anios) {
+            mostrarError('fechaNacimiento', 'La fecha parece demasiado antigua (más de 20 años)', errorDiv);
+            return false;
+        }
+
+        ocultarError('fechaNacimiento', errorDiv);
+        return true;
+    }
+
     function validarEstadoSalud(valor) {
         const errorDiv = document.getElementById('errorEstadoSalud');
 
@@ -181,15 +243,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function mostrarError(campoId, mensaje, errorDiv) {
         const campo = document.getElementById(campoId);
-        campo.classList.add('error');
-        errorDiv.textContent = mensaje;
-        errorDiv.classList.add('visible');
+        if (campo) campo.classList.add('error');
+        if (errorDiv) {
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('visible');
+        }
     }
 
     function ocultarError(campoId, errorDiv) {
         const campo = document.getElementById(campoId);
-        campo.classList.remove('error');
-        errorDiv.classList.remove('visible');
+        if (campo) campo.classList.remove('error');
+        if (errorDiv) {
+            errorDiv.classList.remove('visible');
+        }
     }
 
     function validarFormulario() {
@@ -197,13 +263,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const nombreValido = validarNombre(nombre.value);
         const sexoValido = validarSexo();
         const pesoValido = validarPeso(peso.value);
+        const fechaValida = validarFechaNacimiento(fechaNacimiento.value); // NUEVO
         const estadoValido = validarEstadoSalud(estadoSalud.value);
 
-        return codigoValido && nombreValido && sexoValido && pesoValido && estadoValido;
+        return codigoValido && nombreValido && sexoValido && pesoValido && fechaValida && estadoValido;
     }
 
     function mostrarMensaje(mensaje, tipo) {
-        const msgDiv = document.getElementById('mensajeConfirmacion');
+        // Crear elemento de mensaje si no existe
+        let msgDiv = document.getElementById('mensajeConfirmacion');
+        if (!msgDiv) {
+            msgDiv = document.createElement('div');
+            msgDiv.id = 'mensajeConfirmacion';
+            document.querySelector('.form-actions').after(msgDiv);
+        }
+
         msgDiv.textContent = mensaje;
         msgDiv.className = tipo; // 'success' o 'error'
         msgDiv.classList.remove('hidden');
@@ -226,4 +300,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.transform = 'translateX(0)';
         });
     });
+
+    // Si es edición, validar la fecha inicial
+    if (fechaNacimiento && fechaNacimiento.value) {
+        validarFechaNacimiento(fechaNacimiento.value);
+    }
 });

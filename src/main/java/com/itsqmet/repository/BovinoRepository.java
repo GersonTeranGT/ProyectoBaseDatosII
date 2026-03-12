@@ -30,7 +30,7 @@ public interface BovinoRepository extends JpaRepository<Bovino, Integer> {
     @Query("SELECT AVG(b.peso) FROM Bovino b")
     Double obtenerPesoPromedio();
 
-    // Búsqueda avanzada con múltiples filtros - VERSIÓN CORREGIDA
+    // Búsqueda avanzada con múltiples filtros
     @Query("SELECT b FROM Bovino b WHERE " +
             "(:nombre IS NULL OR :nombre = '' OR " +
             "LOWER(b.nombreBovino) LIKE LOWER(CONCAT('%', :nombre, '%')) OR " +

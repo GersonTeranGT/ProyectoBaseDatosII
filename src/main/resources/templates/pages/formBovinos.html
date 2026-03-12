@@ -9,6 +9,56 @@
     <link rel="stylesheet" th:href="@{/css/formBovino.css}">
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/footer.css}">
+    <!-- Estilos adicionales para el campo de fecha -->
+    <style>
+        /* Estilo específico para el input de fecha */
+        input[type="date"].form-input {
+            color: #4b5563;
+            font-family: 'Inter', monospace;
+        }
+
+        input[type="date"].form-input::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+            opacity: 0;
+        }
+
+        .date-wrapper {
+            position: relative;
+        }
+
+        .date-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        /* Tooltip para formato de fecha */
+        .date-helper {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .date-helper i {
+            color: #10b981;
+            font-size: 0.875rem;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 <!-- Navbar fragment -->
@@ -26,13 +76,14 @@
     </div>
 
     <!-- Mensajes de alerta -->
-    <div th:if="${mensaje}" th:class="${tipoMensaje == 'exito' ? 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4' : 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'}">
+    <div th:if="${mensaje}"
+         th:class="${tipoMensaje == 'exito' ? 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4' : 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'}">
         <span th:text="${mensaje}"></span>
     </div>
 
     <!-- Formulario -->
     <div class="form-container">
-        <form th:action="@{/bovinos/guardar}" th:object="${bovino}" method="post" class="bovino-form">
+        <form th:action="@{/bovinos/guardar}" th:object="${bovino}" method="post" class="bovino-form" id="bovinoForm">
 
             <!-- Campo oculto para el ID (para edición) -->
             <input type="hidden" th:field="*{id}" />
@@ -49,7 +100,7 @@
                        class="form-input"
                        placeholder="Ej: HOL-001, ANG-002"
                        required>
-                <div class="form-error" th:if="${#fields.hasErrors('codigoArete')}" th:errors="*{codigoArete}"></div>
+                <div class="form-error" id="errorCodigoArete" th:if="${#fields.hasErrors('codigoArete')}" th:errors="*{codigoArete}"></div>
             </div>
 
             <!-- Campo: Nombre del Bovino -->
@@ -64,7 +115,7 @@
                        class="form-input"
                        placeholder="Ej: Lola, Manchas, Torito"
                        required>
-                <div class="form-error" th:if="${#fields.hasErrors('nombreBovino')}" th:errors="*{nombreBovino}"></div>
+                <div class="form-error" id="errorNombre" th:if="${#fields.hasErrors('nombreBovino')}" th:errors="*{nombreBovino}"></div>
             </div>
 
             <!-- Campo: Sexo -->
@@ -89,7 +140,7 @@
                         </div>
                     </label>
                 </div>
-                <div class="form-error" th:if="${#fields.hasErrors('sexo')}" th:errors="*{sexo}"></div>
+                <div class="form-error" id="errorSexo" th:if="${#fields.hasErrors('sexo')}" th:errors="*{sexo}"></div>
             </div>
 
             <!-- Campo: Peso -->
@@ -107,7 +158,26 @@
                        class="form-input"
                        placeholder="0.00"
                        required>
-                <div class="form-error" th:if="${#fields.hasErrors('peso')}" th:errors="*{peso}"></div>
+                <div class="form-error" id="errorPeso" th:if="${#fields.hasErrors('peso')}" th:errors="*{peso}"></div>
+            </div>
+
+            <!-- Campo: Fecha de Nacimiento (NUEVO) -->
+            <div class="form-group">
+                <label for="fechaNacimiento" class="form-label">
+                    <i class="fas fa-calendar-alt mr-2 text-green-600"></i>
+                    Fecha de Nacimiento
+                </label>
+                <div class="relative date-wrapper">
+                    <input type="date"
+                           id="fechaNacimiento"
+                           name="fechaNacimiento"
+                           th:field="*{fechaNacimiento}"
+                           class="form-input"
+                           required>
+                    <i class="fas fa-calendar-day date-icon"></i>
+                </div>
+
+                <div class="form-error" id="errorFechaNacimiento" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}"></div>
             </div>
 
             <!-- Campo: Estado de Salud -->
@@ -123,7 +193,7 @@
                     <option value="Observación">Observación</option>
                     <option value="Crítico">Crítico</option>
                 </select>
-                <div class="form-error" th:if="${#fields.hasErrors('estadoSalud')}" th:errors="*{estadoSalud}"></div>
+                <div class="form-error" id="errorEstadoSalud" th:if="${#fields.hasErrors('estadoSalud')}" th:errors="*{estadoSalud}"></div>
             </div>
 
             <!-- Campos opcionales adicionales -->
@@ -134,14 +204,6 @@
                         Raza (opcional)
                     </label>
                     <input type="text" id="raza" th:field="*{raza}" class="form-input" placeholder="Ej: Holstein, Angus, Jersey">
-                </div>
-
-                <div class="form-group">
-                    <label for="fechaNacimiento" class="form-label">
-                        <i class="fas fa-calendar mr-2 text-green-600"></i>
-                        Fecha de Nacimiento (opcional)
-                    </label>
-                    <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" class="form-input">
                 </div>
 
                 <div class="form-group">
@@ -163,7 +225,7 @@
 
             <!-- Botones de acción -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-guardar">
+                <button type="submit" class="btn btn-guardar" id="btnGuardar">
                     <i class="fas fa-save mr-2"></i>
                     <span th:text="${bovino.id != null} ? 'Actualizar Bovino' : 'Guardar Bovino'">Guardar Bovino</span>
                 </button>
@@ -173,6 +235,9 @@
                     Cancelar
                 </a>
             </div>
+
+            <!-- Mensaje de confirmación -->
+            <div id="mensajeConfirmacion" class="hidden"></div>
         </form>
     </div>
 </main>
@@ -182,6 +247,7 @@
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/js/formBovino.js}"></script>
 <div th:replace="~{fragments/navbar :: navbar-scripts}"></div>
 <div th:replace="~{fragments/footer :: footer-scripts}"></div>
 
@@ -198,6 +264,82 @@
         if (selectedSexo) {
             $('input[name="sexo"]:checked').siblings('.sexo-card').addClass('selected border-4 border-green-500');
         }
+    });
+</script>
+<!-- Script de depuración EXTREMO -->
+<script th:inline="javascript">
+    $(document).ready(function() {
+        console.log("====================================");
+        console.log("🔍 DEPURACIÓN EXTREMA DEL FORMULARIO");
+        console.log("====================================");
+
+        // Obtener el objeto bovino del modelo
+        var bovinoData = /*[[${bovino}]]*/ null;
+
+        console.log("Objeto bovino del modelo:", bovinoData);
+
+        if (bovinoData) {
+            console.log("ID:", bovinoData.id);
+            console.log("Nombre:", bovinoData.nombreBovino);
+            console.log("Fecha en modelo:", bovinoData.fechaNacimiento);
+
+            // Ver el input de fecha
+            var fechaInput = document.getElementById('fechaNacimiento');
+            if (fechaInput) {
+                console.log("Input fecha - valor actual:", fechaInput.value);
+                console.log("Input fecha - type:", fechaInput.type);
+                console.log("Input fecha - required:", fechaInput.required);
+
+                // Si hay fecha en el modelo pero no en el input
+                if (bovinoData.fechaNacimiento && !fechaInput.value) {
+                    console.log("⚠️ ASIGNANDO FECHA MANUALMENTE");
+
+                    var fechaStr = bovinoData.fechaNacimiento;
+
+                    // Si es un array [año, mes, dia] o tiene properties
+                    if (typeof fechaStr === 'object') {
+                        try {
+                            // Intentar diferentes formatos
+                            var anio = fechaStr.year || fechaStr[0] || null;
+                            var mes = fechaStr.monthValue || fechaStr.month || fechaStr[1] || null;
+                            var dia = fechaStr.dayOfMonth || fechaStr.day || fechaStr[2] || null;
+
+                            if (anio && mes && dia) {
+                                fechaStr = anio + '-' +
+                                          (mes.toString().padStart(2, '0')) + '-' +
+                                          (dia.toString().padStart(2, '0'));
+                                console.log("Fecha formateada desde objeto:", fechaStr);
+                            }
+                        } catch(e) {
+                            console.error("Error formateando fecha:", e);
+                        }
+                    }
+
+                    // Si es string en formato ISO
+                    if (typeof fechaStr === 'string' && fechaStr.includes('-')) {
+                        // Extraer solo YYYY-MM-DD
+                        fechaStr = fechaStr.substring(0, 10);
+                        fechaInput.value = fechaStr;
+                        console.log("✅ Fecha asignada al input:", fechaStr);
+
+                        // Disparar evento change para activar validaciones
+                        $(fechaInput).trigger('change');
+                    }
+                }
+            }
+
+            // Listar todos los atributos del objeto para depuración
+            console.log("Todos los atributos del bovino:");
+            for (var prop in bovinoData) {
+                if (bovinoData.hasOwnProperty(prop)) {
+                    console.log("  " + prop + ":", bovinoData[prop]);
+                }
+            }
+        } else {
+            console.log("No hay datos de bovino (modo nuevo registro)");
+        }
+
+        console.log("====================================");
     });
 </script>
 </body>

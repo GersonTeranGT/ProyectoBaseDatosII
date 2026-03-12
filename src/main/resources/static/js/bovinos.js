@@ -31,7 +31,7 @@ $(document).ready(function() {
     // Función para cargar datos iniciales
     function cargarDatosIniciales() {
         console.log("Cargando datos iniciales...");
-        $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
+        $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
 
         $.ajax({
             url: '/bovinos/filtrar',
@@ -48,7 +48,7 @@ $(document).ready(function() {
             },
             error: function(error) {
                 console.error("Error al cargar datos iniciales:", error);
-                $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
+                $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
             }
         });
     }
@@ -62,7 +62,7 @@ $(document).ready(function() {
         console.log("Aplicando filtros:", {search, sexo, estadoSalud});
 
         // Mostrar indicador de carga
-        $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
+        $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
 
         // Realizar petición AJAX
         $.ajax({
@@ -79,7 +79,7 @@ $(document).ready(function() {
             },
             error: function(error) {
                 console.error("Error al filtrar:", error);
-                $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
+                $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
             }
         });
     }
@@ -106,7 +106,7 @@ $(document).ready(function() {
             // Mostrar mensaje de sin resultados
             var noResultsRow = `
                 <tr class="no-results-row">
-                    <td colspan="7" class="text-center py-8">
+                    <td colspan="8" class="text-center py-8">
                         <i class="fas fa-search fa-3x text-gray-300 mb-3"></i>
                         <p class="text-gray-500 text-lg">No se encontraron resultados</p>
                         <button onclick="$('#clearFilters').click()" class="mt-3 text-green-600 hover:text-green-800">
@@ -120,7 +120,7 @@ $(document).ready(function() {
         }
     }
 
-    // Función para crear una fila de la tabla - SIN EL OJO
+    // Función para crear una fila de la tabla - CON FECHA DE NACIMIENTO
     function crearFilaBovino(bovino, index) {
         // Determinar clase para el badge de sexo
         var sexoClass = bovino.sexo === 'Macho' ? 'macho' : 'hembra';
@@ -152,7 +152,32 @@ $(document).ready(function() {
                 estadoIcon = 'fa-question-circle';
         }
 
-        // Construir la fila - SIN EL BOTÓN DE VER (OJO)
+        // Formatear fecha de nacimiento desde PostgreSQL (YYYY-MM-DD a DD/MM/YYYY)
+        var fechaNacimiento = '';
+        if (bovino.fechaNacimiento) {
+            // PostgreSQL puede enviar la fecha como "2024-05-15" o "2024/05/15"
+            var fechaStr = bovino.fechaNacimiento;
+
+            // Reemplazar cualquier separador por - para trabajar con Date
+            fechaStr = fechaStr.replace(/\//g, '-');
+
+            // Crear objeto Date (formato YYYY-MM-DD)
+            var fecha = new Date(fechaStr + 'T00:00:00'); // Agregar T00:00:00 para evitar problemas de zona horaria
+
+            if (!isNaN(fecha.getTime())) {
+                var dia = fecha.getDate().toString().padStart(2, '0');
+                var mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                var anio = fecha.getFullYear();
+                fechaNacimiento = dia + '/' + mes + '/' + anio;
+            } else {
+                // Si no se puede parsear, mostrar como viene pero reemplazar / por - para consistencia
+                fechaNacimiento = bovino.fechaNacimiento.replace(/\//g, '-');
+            }
+        } else {
+            fechaNacimiento = '<span class="text-gray-400">—</span>';
+        }
+
+        // Construir la fila - CON FECHA DE NACIMIENTO
         return '<tr class="bovino-row ' + (index % 2 === 0 ? '' : 'bg-gray-50') + ' hover:bg-gray-100">' +
                '<td class="font-medium text-gray-900">' + (bovino.id || '') + '</td>' +
                '<td>' + (bovino.codigoArete || '') + '</td>' +
@@ -160,6 +185,7 @@ $(document).ready(function() {
                '<td><span class="sexo-badge ' + sexoClass + '">' +
                '<i class="fas ' + sexoIcon + ' mr-1"></i>' + (bovino.sexo || '') + '</span></td>' +
                '<td class="font-medium">' + (bovino.peso ? bovino.peso.toFixed(1) : '0') + ' kg</td>' +
+               '<td class="text-gray-600">' + fechaNacimiento + '</td>' +  <!-- NUEVA CELDA -->
                '<td><span class="estado-badge">' +
                '<span class="' + estadoClass + '">' +
                '<i class="fas ' + estadoIcon + ' mr-1"></i>' + (bovino.estadoSalud || '') + '</span>' +
