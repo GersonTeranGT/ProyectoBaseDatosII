@@ -6,75 +6,43 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "bovinos")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Bovino {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "codigo_arete", nullable = false, unique = true, length = 20)
     private String codigoArete;
+
+    @Column(name = "nombre_bovino", nullable = false, length = 100)
     private String nombreBovino;
+
+    @Column(nullable = false, length = 10)
     private String sexo;
+
+    @Column(nullable = false)
     private Double peso;
+
+    @Column(name = "estado_salud", nullable = false, length = 20)
     private String estadoSalud;
 
-    // Constructores
-    public Bovino() {}
+    // Campos opcionales (si los agregas a la base de datos)
+    @Column(length = 50)
+    private String raza;
 
-    public Bovino(Integer id, String codigoArete, String nombreBovino, String sexo, Double peso, String estadoSalud) {
-        this.id = id;
-        this.codigoArete = codigoArete;
-        this.nombreBovino = nombreBovino;
-        this.sexo = sexo;
-        this.peso = peso;
-        this.estadoSalud = estadoSalud;
-    }
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
 
-    // Getters y Setters
-    public Integer getId() {
-        return id;
-    }
+    @Column(length = 30)
+    private String color;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getCodigoArete() {
-        return codigoArete;
-    }
-
-    public void setCodigoArete(String codigoArete) {
-        this.codigoArete = codigoArete;
-    }
-
-    public String getNombreBovino() {
-        return nombreBovino;
-    }
-
-    public void setNombreBovino(String nombreBovino) {
-        this.nombreBovino = nombreBovino;
-    }
-
-    public String getSexo() {
-        return sexo;
-    }
-
-    public void setSexo(String sexo) {
-        this.sexo = sexo;
-    }
-
-    public Double getPeso() {
-        return peso;
-    }
-
-    public void setPeso(Double peso) {
-        this.peso = peso;
-    }
-
-    public String getEstadoSalud() {
-        return estadoSalud;
-    }
-
-    public void setEstadoSalud(String estadoSalud) {
-        this.estadoSalud = estadoSalud;
-    }
-
+    @Column(length = 500)
+    private String observaciones;
 }

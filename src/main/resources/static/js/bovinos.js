@@ -1,176 +1,166 @@
+// bovinos.js - Versión con AJAX manteniendo estilos originales
+
 $(document).ready(function() {
 
-    // Búsqueda en tiempo real
-    $('#searchInput').on('keyup', function() {
-        filterTable();
+    // Variables para manejar el timeout de la búsqueda
+    var searchTimeout;
+
+    // Aplicar filtros cuando cambien los campos
+    $('#searchInput').on('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            aplicarFiltros();
+        }, 300); // Espera 300ms después de que el usuario deje de escribir
     });
 
-    // Filtros por sexo y estado de salud
     $('#sexoFilter, #saludFilter').on('change', function() {
-        filterTable();
+        aplicarFiltros();
     });
 
-    // Botón limpiar filtros
+    // Botón para limpiar filtros
     $('#clearFilters').on('click', function() {
         $('#searchInput').val('');
         $('#sexoFilter').val('');
         $('#saludFilter').val('');
-        filterTable();
+        aplicarFiltros();
         showNotification('Filtros limpiados', 'success');
     });
 
-    // Función para filtrar la tabla
-    function filterTable() {
-        let searchText = $('#searchInput').val().toLowerCase();
-        let sexoFilter = $('#sexoFilter').val();
-        let saludFilter = $('#saludFilter').val();
-        let visibleCount = 0;
+    // Función para aplicar filtros vía AJAX
+    function aplicarFiltros() {
+        var search = $('#searchInput').val();
+        var sexo = $('#sexoFilter').val();
+        var estadoSalud = $('#saludFilter').val();
 
-        $('.bovino-row').each(function() {
-            let row = $(this);
-            let nombre = row.find('td:eq(2)').text().toLowerCase();
-            let arete = row.find('td:eq(1)').text().toLowerCase();
-            let sexo = row.find('.sexo-badge').text().trim();
-            let salud = row.find('.estado-badge span').text().trim();
+        // Mostrar indicador de carga
+        $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
 
-            let matchesSearch = searchText === '' ||
-                nombre.includes(searchText) ||
-                arete.includes(searchText);
-
-            let matchesSexo = sexoFilter === '' ||
-                sexo.includes(sexoFilter);
-
-            let matchesSalud = saludFilter === '' ||
-                salud.includes(saludFilter);
-
-            if (matchesSearch && matchesSexo && matchesSalud) {
-                row.show();
-                visibleCount++;
-                // Animación sutil al mostrar
-                row.css('animation', 'fadeIn 0.5s');
-            } else {
-                row.hide();
+        // Realizar petición AJAX
+        $.ajax({
+            url: '/bovinos/filtrar',
+            method: 'GET',
+            data: {
+                search: search,
+                sexo: sexo,
+                estadoSalud: estadoSalud
+            },
+            success: function(data) {
+                actualizarTabla(data);
+                actualizarEstadisticas();
+            },
+            error: function(error) {
+                console.error("Error al filtrar:", error);
+                $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
             }
-        });
-
-        // Actualizar contador de registros visibles
-        let totalRegistros = $('.bovino-row').length;
-        $('#totalRegistros').text(visibleCount + ' de ' + totalRegistros + ' registros mostrados');
-
-        // Mostrar mensaje si no hay resultados
-        if (visibleCount === 0) {
-            if ($('.no-results-row').length === 0) {
-                let noResultsRow = `
-                    <tr class="no-results-row">
-                        <td colspan="7" class="text-center py-8">
-                            <i class="fas fa-search fa-3x text-gray-300 mb-3"></i>
-                            <p class="text-gray-500 text-lg">No se encontraron resultados</p>
-                            <button onclick="$('#clearFilters').click()" class="mt-3 text-green-600 hover:text-green-800">
-                                <i class="fas fa-undo mr-1"></i>Limpiar filtros
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $('#bovinosTableBody').append(noResultsRow);
-            }
-        } else {
-            $('.no-results-row').remove();
-        }
-    }
-
-    // Ordenamiento de columnas
-    $('.bovinos-table th').each(function(index) {
-        if (index < 6) { // No ordenar la columna de acciones
-            $(this).css('cursor', 'pointer').append(' <i class="fas fa-sort text-gray-400 ml-1"></i>');
-            $(this).on('click', function() {
-                sortTable(index);
-            });
-        }
-    });
-
-    function sortTable(columnIndex) {
-        let rows = $('.bovino-row').get();
-        let isAscending = $(`.bovinos-table th:eq(${columnIndex}) i.fa-sort`).hasClass('fa-sort-up');
-
-        // Resetear iconos
-        $('.bovinos-table th i').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
-
-        rows.sort(function(a, b) {
-            let aValue = $(a).find('td:eq(' + columnIndex + ')').text().trim();
-            let bValue = $(b).find('td:eq(' + columnIndex + ')').text().trim();
-
-            // Manejar valores numéricos
-            if (columnIndex === 4) { // Columna de peso
-                aValue = parseFloat(aValue) || 0;
-                bValue = parseFloat(bValue) || 0;
-            } else {
-                aValue = aValue.toLowerCase();
-                bValue = bValue.toLowerCase();
-            }
-
-            if (aValue < bValue) return isAscending ? -1 : 1;
-            if (aValue > bValue) return isAscending ? 1 : -1;
-            return 0;
-        });
-
-        // Actualizar icono
-        if (isAscending) {
-            $(`.bovinos-table th:eq(${columnIndex}) i`).removeClass('fa-sort').addClass('fa-sort-down');
-        } else {
-            $(`.bovinos-table th:eq(${columnIndex}) i`).removeClass('fa-sort').addClass('fa-sort-up');
-        }
-
-        // Reordenar filas
-        $.each(rows, function(index, row) {
-            $('#bovinosTableBody').append(row);
         });
     }
 
-    // Animación de entrada para las filas
-    $('.bovino-row').each(function(index) {
-        $(this).css('animation', `fadeIn 0.5s ease forwards ${index * 0.1}s`);
-    });
+    // Función para actualizar la tabla con los resultados
+    function actualizarTabla(bovinos) {
+        var tbody = $('#bovinosTableBody');
+        tbody.empty();
 
-    // Tooltips mejorados
-    $('[title]').tooltip({
-        position: {
-            my: "center bottom-20",
-            at: "center top",
-            using: function(position, feedback) {
-                $(this).css(position);
-                $("<div>")
-                    .addClass("tooltip-arrow")
-                    .appendTo(this);
-            }
-        }
-    });
-
-    // Exportar a CSV
-    $('#exportCSV').on('click', function() {
-        let csv = [];
-        let rows = $('.bovinos-table tr');
-
-        rows.each(function() {
-            let row = [];
-            $(this).find('td:not(:last-child)').each(function() {
-                row.push('"' + $(this).text().trim() + '"');
+        if (bovinos && bovinos.length > 0) {
+            $.each(bovinos, function(index, bovino) {
+                var fila = crearFilaBovino(bovino, index);
+                tbody.append(fila);
             });
-            csv.push(row.join(','));
+
+            // Aplicar animaciones a las nuevas filas
+            $('.bovino-row').each(function(index) {
+                $(this).css('animation', `fadeIn 0.5s ease forwards ${index * 0.1}s`);
+            });
+
+            // Actualizar contador de registros
+            $('#totalRegistros').text(bovinos.length + ' registros mostrados');
+        } else {
+            // Mostrar mensaje de sin resultados con el mismo estilo del JS original
+            var noResultsRow = `
+                <tr class="no-results-row">
+                    <td colspan="7" class="text-center py-8">
+                        <i class="fas fa-search fa-3x text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 text-lg">No se encontraron resultados</p>
+                        <button onclick="$('#clearFilters').click()" class="mt-3 text-green-600 hover:text-green-800">
+                            <i class="fas fa-undo mr-1"></i>Limpiar filtros
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(noResultsRow);
+            $('#totalRegistros').text('0 registros mostrados');
+        }
+    }
+
+    // Función para crear una fila de la tabla - EXACTAMENTE con los estilos originales
+    function crearFilaBovino(bovino, index) {
+        // Determinar clase para el badge de sexo
+        var sexoClass = bovino.sexo === 'Macho' ? 'macho' : 'hembra';
+        var sexoIcon = bovino.sexo === 'Macho' ? 'fa-mars' : 'fa-venus';
+
+        // Determinar clase para el badge de estado
+        var estadoClass = '';
+        var estadoIcon = '';
+
+        switch(bovino.estadoSalud) {
+            case 'Saludable':
+                estadoClass = 'saludable';
+                estadoIcon = 'fa-check-circle';
+                break;
+            case 'En tratamiento':
+                estadoClass = 'tratamiento';
+                estadoIcon = 'fa-medkit';
+                break;
+            case 'Observación':
+                estadoClass = 'observacion';
+                estadoIcon = 'fa-eye';
+                break;
+            case 'Crítico':
+                estadoClass = 'critico';
+                estadoIcon = 'fa-exclamation-triangle';
+                break;
+            default:
+                estadoClass = 'default';
+                estadoIcon = 'fa-question-circle';
+        }
+
+        // Construir la fila con la misma estructura HTML del JS original
+        return '<tr class="bovino-row ' + (index % 2 === 0 ? '' : 'bg-gray-50') + ' hover:bg-gray-100">' +
+               '<td class="font-medium text-gray-900">' + (bovino.id || '') + '</td>' +
+               '<td>' + (bovino.codigoArete || '') + '</td>' +
+               '<td class="font-semibold">' + (bovino.nombreBovino || '') + '</td>' +
+               '<td><span class="sexo-badge ' + sexoClass + '">' +
+               '<i class="fas ' + sexoIcon + ' mr-1"></i>' + (bovino.sexo || '') + '</span></td>' +
+               '<td class="font-medium">' + (bovino.peso ? bovino.peso.toFixed(1) : '0') + ' kg</td>' +
+               '<td><span class="estado-badge">' +
+               '<span class="' + estadoClass + '">' +
+               '<i class="fas ' + estadoIcon + ' mr-1"></i>' + (bovino.estadoSalud || '') + '</span>' +
+               '</span></td>' +
+               '<td><div class="acciones-container">' +
+               '<a href="/bovinos/editar/' + bovino.id + '" class="btn-editar" title="Editar"><i class="fas fa-edit"></i></a>' +
+               '<a href="/bovinos/ver/' + bovino.id + '" class="btn-ver" title="Ver detalles"><i class="fas fa-eye"></i></a>' +
+               '<a href="/bovinos/eliminar/' + bovino.id + '" class="btn-eliminar" title="Eliminar" onclick="return confirm(\'¿Estás seguro de eliminar este bovino?\')"><i class="fas fa-trash-alt"></i></a>' +
+               '</div></td></tr>';
+    }
+
+    // Función para actualizar estadísticas
+    function actualizarEstadisticas() {
+        $.ajax({
+            url: '/bovinos/estadisticas',
+            method: 'GET',
+            success: function(data) {
+                $('#totalBovinos').text(data.totalBovinos);
+                $('#totalMachos').text(data.totalMachos);
+                $('#totalHembras').text(data.totalHembras);
+                $('#totalSaludables').text(data.totalSaludables);
+                $('#pesoPromedio').text(data.pesoPromedio + ' kg');
+            },
+            error: function(error) {
+                console.error("Error al actualizar estadísticas:", error);
+            }
         });
+    }
 
-        // Descargar archivo
-        let csvContent = csv.join('\n');
-        let blob = new Blob([csvContent], { type: 'text/csv' });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'bovinos.csv';
-        a.click();
-
-        showNotification('Archivo exportado exitosamente', 'success');
-    });
-
-    // Función para mostrar notificaciones
+    // Función para mostrar notificaciones (del JS original)
     window.showNotification = function(message, type) {
         // Crear elemento de notificación si no existe
         if ($('#notification-container').length === 0) {
@@ -205,12 +195,12 @@ $(document).ready(function() {
     };
 });
 
-// Función global para confirmar eliminación
+// Función global para confirmar eliminación (del JS original)
 function confirmarEliminacion(nombre) {
     return confirm('¿Estás seguro de que deseas eliminar a ' + nombre + '? Esta acción no se puede deshacer.');
 }
 
-// Estilo adicional para animaciones
+// Estilo adicional para animaciones (del JS original)
 $('<style>')
     .prop('type', 'text/css')
     .html(`
