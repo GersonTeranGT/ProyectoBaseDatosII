@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "bovinos")
+@Table(name = "bovino")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class Bovino {
     @Column(name = "codigo_arete", nullable = false, unique = true, length = 20)
     private String codigoArete;
 
-    @Column(name = "nombre_bovino", nullable = false, length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombreBovino;
 
     @Column(nullable = false, length = 10)

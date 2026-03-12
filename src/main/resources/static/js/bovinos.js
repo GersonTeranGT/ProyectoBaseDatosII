@@ -110,8 +110,8 @@ $(document).ready(function() {
                 estadoClass = 'tratamiento';
                 estadoIcon = 'fa-medkit';
                 break;
-            case 'Observación':
-                estadoClass = 'observacion';
+            case 'En observación':
+                estadoClass = 'en observacion';
                 estadoIcon = 'fa-eye';
                 break;
             case 'Crítico':
