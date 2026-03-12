@@ -1,6 +1,8 @@
-// bovinos.js - Versión con AJAX manteniendo estilos originales
-
 $(document).ready(function() {
+    console.log("Inicializando bovinos.js");
+
+    // Cargar datos iniciales al abrir la página
+    cargarDatosIniciales();
 
     // Variables para manejar el timeout de la búsqueda
     var searchTimeout;
@@ -10,7 +12,7 @@ $(document).ready(function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(function() {
             aplicarFiltros();
-        }, 300); // Espera 300ms después de que el usuario deje de escribir
+        }, 300);
     });
 
     $('#sexoFilter, #saludFilter').on('change', function() {
@@ -26,11 +28,38 @@ $(document).ready(function() {
         showNotification('Filtros limpiados', 'success');
     });
 
+    // Función para cargar datos iniciales
+    function cargarDatosIniciales() {
+        console.log("Cargando datos iniciales...");
+        $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
+
+        $.ajax({
+            url: '/bovinos/filtrar',
+            method: 'GET',
+            data: {
+                search: '',
+                sexo: '',
+                estadoSalud: ''
+            },
+            success: function(data) {
+                console.log("Datos iniciales cargados:", data.length, "registros");
+                actualizarTabla(data);
+                actualizarEstadisticas();
+            },
+            error: function(error) {
+                console.error("Error al cargar datos iniciales:", error);
+                $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
+            }
+        });
+    }
+
     // Función para aplicar filtros vía AJAX
     function aplicarFiltros() {
         var search = $('#searchInput').val();
         var sexo = $('#sexoFilter').val();
         var estadoSalud = $('#saludFilter').val();
+
+        console.log("Aplicando filtros:", {search, sexo, estadoSalud});
 
         // Mostrar indicador de carga
         $('#bovinosTableBody').html('<tr><td colspan="7" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
@@ -74,7 +103,7 @@ $(document).ready(function() {
             // Actualizar contador de registros
             $('#totalRegistros').text(bovinos.length + ' registros mostrados');
         } else {
-            // Mostrar mensaje de sin resultados con el mismo estilo del JS original
+            // Mostrar mensaje de sin resultados
             var noResultsRow = `
                 <tr class="no-results-row">
                     <td colspan="7" class="text-center py-8">
@@ -91,7 +120,7 @@ $(document).ready(function() {
         }
     }
 
-    // Función para crear una fila de la tabla - EXACTAMENTE con los estilos originales
+    // Función para crear una fila de la tabla - SIN EL OJO
     function crearFilaBovino(bovino, index) {
         // Determinar clase para el badge de sexo
         var sexoClass = bovino.sexo === 'Macho' ? 'macho' : 'hembra';
@@ -111,7 +140,7 @@ $(document).ready(function() {
                 estadoIcon = 'fa-medkit';
                 break;
             case 'En observación':
-                estadoClass = 'en observacion';
+                estadoClass = 'observacion';
                 estadoIcon = 'fa-eye';
                 break;
             case 'Crítico':
@@ -123,7 +152,7 @@ $(document).ready(function() {
                 estadoIcon = 'fa-question-circle';
         }
 
-        // Construir la fila con la misma estructura HTML del JS original
+        // Construir la fila - SIN EL BOTÓN DE VER (OJO)
         return '<tr class="bovino-row ' + (index % 2 === 0 ? '' : 'bg-gray-50') + ' hover:bg-gray-100">' +
                '<td class="font-medium text-gray-900">' + (bovino.id || '') + '</td>' +
                '<td>' + (bovino.codigoArete || '') + '</td>' +
@@ -137,7 +166,6 @@ $(document).ready(function() {
                '</span></td>' +
                '<td><div class="acciones-container">' +
                '<a href="/bovinos/editar/' + bovino.id + '" class="btn-editar" title="Editar"><i class="fas fa-edit"></i></a>' +
-               '<a href="/bovinos/ver/' + bovino.id + '" class="btn-ver" title="Ver detalles"><i class="fas fa-eye"></i></a>' +
                '<a href="/bovinos/eliminar/' + bovino.id + '" class="btn-eliminar" title="Eliminar" onclick="return confirm(\'¿Estás seguro de eliminar este bovino?\')"><i class="fas fa-trash-alt"></i></a>' +
                '</div></td></tr>';
     }
@@ -148,11 +176,11 @@ $(document).ready(function() {
             url: '/bovinos/estadisticas',
             method: 'GET',
             success: function(data) {
-                $('#totalBovinos').text(data.totalBovinos);
-                $('#totalMachos').text(data.totalMachos);
-                $('#totalHembras').text(data.totalHembras);
-                $('#totalSaludables').text(data.totalSaludables);
-                $('#pesoPromedio').text(data.pesoPromedio + ' kg');
+                $('#totalBovinos').text(data.totalBovinos || 0);
+                $('#totalMachos').text(data.totalMachos || 0);
+                $('#totalHembras').text(data.totalHembras || 0);
+                $('#totalSaludables').text(data.totalSaludables || 0);
+                $('#pesoPromedio').text((data.pesoPromedio || '0') + ' kg');
             },
             error: function(error) {
                 console.error("Error al actualizar estadísticas:", error);
@@ -160,7 +188,7 @@ $(document).ready(function() {
         });
     }
 
-    // Función para mostrar notificaciones (del JS original)
+    // Función para mostrar notificaciones
     window.showNotification = function(message, type) {
         // Crear elemento de notificación si no existe
         if ($('#notification-container').length === 0) {
@@ -195,12 +223,7 @@ $(document).ready(function() {
     };
 });
 
-// Función global para confirmar eliminación (del JS original)
-function confirmarEliminacion(nombre) {
-    return confirm('¿Estás seguro de que deseas eliminar a ' + nombre + '? Esta acción no se puede deshacer.');
-}
-
-// Estilo adicional para animaciones (del JS original)
+// Estilo adicional para animaciones
 $('<style>')
     .prop('type', 'text/css')
     .html(`
