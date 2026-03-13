@@ -209,13 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Validar que no sea una fecha futura
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        if (fecha > hoy) {
-            mostrarError('fechaNacimiento', 'La fecha de nacimiento no puede ser futura', errorDiv);
-            return false;
-        }
+
 
         // Validar que no sea demasiado antigua (más de 20 años)
         const hace20Anios = new Date();
