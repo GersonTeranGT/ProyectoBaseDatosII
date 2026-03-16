@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title th:text="${titulo}">Registrar Bovino</title>
     <!-- favicon -->
-    <link rel="icon" th:href="@{/images/vaca.png}">
+    <link rel="icon" th:href="@{images/vaca.png}">
     <!-- Tus estilos existentes -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -87,7 +87,7 @@
     <div class="form-container">
         <form th:action="@{/bovinos/guardar}" th:object="${bovino}" method="post" class="bovino-form" id="bovinoForm">
 
-            <!-- Campo oculto para el ID (para edición) -->
+            <!-- CAMBIO IMPORTANTE: idBovino en lugar de id -->
             <input type="hidden" th:field="*{id}" />
 
             <!-- Campo: Código de Arete -->
@@ -100,7 +100,7 @@
                        id="codigoArete"
                        th:field="*{codigoArete}"
                        class="form-input"
-                       placeholder="Ej: HOL-001, ANG-002"
+                       placeholder="Ej: BOV-001, HOL-001"
                        required>
                 <div class="form-error" id="errorCodigoArete" th:if="${#fields.hasErrors('codigoArete')}" th:errors="*{codigoArete}"></div>
             </div>
@@ -163,7 +163,7 @@
                 <div class="form-error" id="errorPeso" th:if="${#fields.hasErrors('peso')}" th:errors="*{peso}"></div>
             </div>
 
-            <!-- Campo: Fecha de Nacimiento (NUEVO) -->
+            <!-- Campo: Fecha de Nacimiento - CORREGIDO -->
             <div class="form-group">
                 <label for="fechaNacimiento" class="form-label">
                     <i class="fas fa-calendar-alt mr-2 text-green-600"></i>
@@ -173,12 +173,15 @@
                     <input type="date"
                            id="fechaNacimiento"
                            name="fechaNacimiento"
-                           th:field="*{fechaNacimiento}"
+                           th:value="${bovino.fechaNacimiento != null ? #temporals.format(bovino.fechaNacimiento, 'yyyy-MM-dd') : ''}"
                            class="form-input"
                            required>
                     <i class="fas fa-calendar-day date-icon"></i>
                 </div>
-
+                <div class="date-helper">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Formato: YYYY-MM-DD (Ej: 2021-03-10)</span>
+                </div>
                 <div class="form-error" id="errorFechaNacimiento" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}"></div>
             </div>
 
@@ -198,32 +201,51 @@
                 <div class="form-error" id="errorEstadoSalud" th:if="${#fields.hasErrors('estadoSalud')}" th:errors="*{estadoSalud}"></div>
             </div>
 
-            <!-- Campos opcionales adicionales -->
-            <div class="optional-fields">
-                <div class="form-group">
-                    <label for="raza" class="form-label">
-                        <i class="fas fa-paw mr-2 text-green-600"></i>
-                        Raza (opcional)
-                    </label>
-                    <input type="text" id="raza" th:field="*{raza}" class="form-input" placeholder="Ej: Holstein, Angus, Jersey">
-                </div>
+            <!-- === NUEVOS CAMPOS: Selectores desde BD === -->
 
-                <div class="form-group">
-                    <label for="color" class="form-label">
-                        <i class="fas fa-palette mr-2 text-green-600"></i>
-                        Color (opcional)
-                    </label>
-                    <input type="text" id="color" th:field="*{color}" class="form-input" placeholder="Ej: Blanco y Negro, Marrón">
-                </div>
-
-                <div class="form-group">
-                    <label for="observaciones" class="form-label">
-                        <i class="fas fa-comment mr-2 text-green-600"></i>
-                        Observaciones (opcional)
-                    </label>
-                    <textarea id="observaciones" th:field="*{observaciones}" rows="3" class="form-input" placeholder="Notas adicionales..."></textarea>
-                </div>
+            <!-- Campo: Raza (select desde BD) -->
+            <div class="form-group">
+                <label for="raza" class="form-label">
+                    <i class="fas fa-paw mr-2 text-green-600"></i>
+                    Raza
+                </label>
+                <select id="raza" th:field="*{raza.idRaza}" class="form-input">
+                    <option value="">Selecciona una raza</option>
+                    <option th:each="raza : ${razas}"
+                            th:value="${raza.idRaza}"
+                            th:text="${raza.nombre}"></option>
+                </select>
             </div>
+
+            <!-- Campo: Potrero (select desde BD) -->
+            <div class="form-group">
+                <label for="potrero" class="form-label">
+                    <i class="fas fa-tree mr-2 text-green-600"></i>
+                    Potrero
+                </label>
+                <select id="potrero" th:field="*{potrero.idPotrero}" class="form-input">
+                    <option value="">Selecciona un potrero</option>
+                    <option th:each="potrero : ${potreros}"
+                            th:value="${potrero.idPotrero}"
+                            th:text="${potrero.nombrePotrero}"></option>
+                </select>
+            </div>
+
+            <!-- Campo: Empleado (select desde BD) -->
+            <div class="form-group">
+                <label for="empleado" class="form-label">
+                    <i class="fas fa-user mr-2 text-green-600"></i>
+                    Empleado Responsable
+                </label>
+                <select id="empleado" th:field="*{empleado.idEmpleado}" class="form-input">
+                    <option value="">Selecciona un empleado</option>
+                    <option th:each="empleado : ${empleados}"
+                            th:value="${empleado.idEmpleado}"
+                            th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
+                </select>
+            </div>
+
+            <!-- === FIN DE NUEVOS CAMPOS === -->
 
             <!-- Botones de acción -->
             <div class="form-actions">
@@ -268,79 +290,28 @@
         }
     });
 </script>
-<!-- Script de depuración EXTREMO -->
+
+<!-- Script de depuración (opcional, puedes eliminarlo después) -->
 <script th:inline="javascript">
     $(document).ready(function() {
         console.log("====================================");
-        console.log("🔍 DEPURACIÓN EXTREMA DEL FORMULARIO");
+        console.log("🔍 DEPURACIÓN DEL FORMULARIO");
         console.log("====================================");
 
-        // Obtener el objeto bovino del modelo
         var bovinoData = /*[[${bovino}]]*/ null;
 
-        console.log("Objeto bovino del modelo:", bovinoData);
-
-        if (bovinoData) {
-            console.log("ID:", bovinoData.id);
-            console.log("Nombre:", bovinoData.nombreBovino);
-            console.log("Fecha en modelo:", bovinoData.fechaNacimiento);
-
-            // Ver el input de fecha
-            var fechaInput = document.getElementById('fechaNacimiento');
-            if (fechaInput) {
-                console.log("Input fecha - valor actual:", fechaInput.value);
-                console.log("Input fecha - type:", fechaInput.type);
-                console.log("Input fecha - required:", fechaInput.required);
-
-                // Si hay fecha en el modelo pero no en el input
-                if (bovinoData.fechaNacimiento && !fechaInput.value) {
-                    console.log("⚠️ ASIGNANDO FECHA MANUALMENTE");
-
-                    var fechaStr = bovinoData.fechaNacimiento;
-
-                    // Si es un array [año, mes, dia] o tiene properties
-                    if (typeof fechaStr === 'object') {
-                        try {
-                            // Intentar diferentes formatos
-                            var anio = fechaStr.year || fechaStr[0] || null;
-                            var mes = fechaStr.monthValue || fechaStr.month || fechaStr[1] || null;
-                            var dia = fechaStr.dayOfMonth || fechaStr.day || fechaStr[2] || null;
-
-                            if (anio && mes && dia) {
-                                fechaStr = anio + '-' +
-                                          (mes.toString().padStart(2, '0')) + '-' +
-                                          (dia.toString().padStart(2, '0'));
-                                console.log("Fecha formateada desde objeto:", fechaStr);
-                            }
-                        } catch(e) {
-                            console.error("Error formateando fecha:", e);
-                        }
-                    }
-
-                    // Si es string en formato ISO
-                    if (typeof fechaStr === 'string' && fechaStr.includes('-')) {
-                        // Extraer solo YYYY-MM-DD
-                        fechaStr = fechaStr.substring(0, 10);
-                        fechaInput.value = fechaStr;
-                        console.log("✅ Fecha asignada al input:", fechaStr);
-
-                        // Disparar evento change para activar validaciones
-                        $(fechaInput).trigger('change');
-                    }
-                }
-            }
-
-            // Listar todos los atributos del objeto para depuración
-            console.log("Todos los atributos del bovino:");
-            for (var prop in bovinoData) {
-                if (bovinoData.hasOwnProperty(prop)) {
-                    console.log("  " + prop + ":", bovinoData[prop]);
-                }
-            }
+        if (bovinoData && bovinoData.idBovino) {
+            console.log("Modo edición - ID:", bovinoData.idBovino);
+            console.log("Raza ID:", bovinoData.raza?.idRaza);
+            console.log("Potrero ID:", bovinoData.potrero?.idPotrero);
+            console.log("Empleado ID:", bovinoData.empleado?.idEmpleado);
         } else {
-            console.log("No hay datos de bovino (modo nuevo registro)");
+            console.log("Modo nuevo registro");
         }
 
+        console.log("Razas disponibles:", /*[[${razas}]]*/ null ? /*[[${razas.size()}]]*/ 0 : 0);
+        console.log("Potreros disponibles:", /*[[${potreros}]]*/ null ? /*[[${potreros.size()}]]*/ 0 : 0);
+        console.log("Empleados disponibles:", /*[[${empleados}]]*/ null ? /*[[${empleados.size()}]]*/ 0 : 0);
         console.log("====================================");
     });
 </script>

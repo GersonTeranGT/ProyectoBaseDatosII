@@ -8,10 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/bovinos")
@@ -46,6 +43,12 @@ public class BovinoController {
         model.addAttribute("titulo", "Agregar Nuevo Bovino");
         model.addAttribute("currentPage", "nuevo-bovino");
         model.addAttribute("bovino", new Bovino());
+
+        // Cargar listas para los selectores
+        model.addAttribute("razas", bovinoService.listarRazas());
+        model.addAttribute("potreros", bovinoService.listarPotreros());
+        model.addAttribute("empleados", bovinoService.listarEmpleados());
+
         return "pages/formBovinos";
     }
 
@@ -72,6 +75,12 @@ public class BovinoController {
             model.addAttribute("titulo", "Editar Bovino");
             model.addAttribute("currentPage", "editar-bovino");
             model.addAttribute("bovino", bovinoOpt.get());
+
+            // Cargar listas para los selectores
+            model.addAttribute("razas", bovinoService.listarRazas());
+            model.addAttribute("potreros", bovinoService.listarPotreros());
+            model.addAttribute("empleados", bovinoService.listarEmpleados());
+
             return "pages/formBovinos";
         } else {
             redirectAttributes.addFlashAttribute("mensaje", "Bovino no encontrado");
@@ -117,19 +126,37 @@ public class BovinoController {
                                        @RequestParam(required = false) String sexo,
                                        @RequestParam(required = false) String estadoSalud) {
         try {
+            System.out.println("=== FILTRAR BOVINOS ===");
+            System.out.println("Parámetros recibidos - search: " + search + ", sexo: " + sexo + ", estadoSalud: " + estadoSalud);
+
             List<Bovino> resultados;
 
             if (search != null && !search.trim().isEmpty()) {
+                System.out.println("Buscando por término: " + search);
                 resultados = bovinoService.buscarPorNombreOCodigo(search.trim());
             } else if ((sexo != null && !sexo.isEmpty()) || (estadoSalud != null && !estadoSalud.isEmpty())) {
+                System.out.println("Filtrando por sexo: " + sexo + ", estado: " + estadoSalud);
                 resultados = bovinoService.buscarConFiltros(null, sexo, estadoSalud);
             } else {
+                System.out.println("Cargando todos los bovinos");
                 resultados = bovinoService.listarTodos();
+            }
+
+            System.out.println("Resultados encontrados: " + resultados.size());
+
+            // Verificar que los objetos tengan los datos correctos
+            if (!resultados.isEmpty()) {
+                Bovino primero = resultados.get(0);
+                System.out.println("Primer bovino - ID: " + primero.getId() +
+                        ", Nombre: " + primero.getNombreBovino() +
+                        ", Fecha: " + primero.getFechaNacimiento());
             }
 
             return resultados;
         } catch (Exception e) {
-            return List.of();
+            System.err.println("ERROR al filtrar bovinos: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>(); // Retornar lista vacía en caso de error
         }
     }
 

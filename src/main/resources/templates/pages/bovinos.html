@@ -72,24 +72,23 @@
 
     <!-- Tabla de bovinos -->
     <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-            <table class="bovinos-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Código Arete</th>
-                    <th>Nombre</th>
-                    <th>Sexo</th>
-                    <th>Peso (kg)</th>
-                    <th>Fecha Nacimiento</th>
-                    <th>Estado Salud</th>
-                    <th>Acciones</th>
-                </tr>
-                </thead>
-                <tbody id="bovinosTableBody">
-                <!-- Las filas se cargarán vía AJAX -->
-                </tbody>
-            </table>
+        <table class="bovinos-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Código Arete</th>
+                <th>Nombre</th>
+                <th>Sexo</th>
+                <th>Peso (kg)</th>
+                <th>Fecha Nacimiento</th>
+                <th>Estado Salud</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="bovinosTableBody">
+            <!-- Las filas se cargarán vía AJAX -->
+            </tbody>
+        </table>
 
         <!-- Resumen -->
         <div class="border-t border-gray-200 p-4 flex justify-between items-center text-gray-600">
@@ -101,7 +100,7 @@
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-8">
         <div class="stat-card">
             <div class="stat-icon bg-blue-100 text-blue-600">
-                <i class="fas fa-list fa-2x"></i>
+                <img th:src="@{/images/animal.png}" alt="Icono de vaca" class="nav-icon">
             </div>
             <div class="stat-info">
                 <span class="stat-label">Total</span>

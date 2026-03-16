@@ -1,6 +1,4 @@
 $(document).ready(function() {
-    console.log("Inicializando bovinos.js");
-
     // Cargar datos iniciales al abrir la página
     cargarDatosIniciales();
 
@@ -30,7 +28,6 @@ $(document).ready(function() {
 
     // Función para cargar datos iniciales
     function cargarDatosIniciales() {
-        console.log("Cargando datos iniciales...");
         $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
 
         $.ajax({
@@ -42,13 +39,15 @@ $(document).ready(function() {
                 estadoSalud: ''
             },
             success: function(data) {
-                console.log("Datos iniciales cargados:", data.length, "registros");
-                actualizarTabla(data);
-                actualizarEstadisticas();
+                if (Array.isArray(data)) {
+                    actualizarTabla(data);
+                    actualizarEstadisticas();
+                } else {
+                    $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error: Formato de datos incorrecto</p></td></tr>');
+                }
             },
-            error: function(error) {
-                console.error("Error al cargar datos iniciales:", error);
-                $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
+            error: function() {
+                $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p><button onclick="cargarDatosIniciales()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"><i class="fas fa-sync-alt mr-2"></i>Reintentar</button></td></tr>');
             }
         });
     }
@@ -59,12 +58,8 @@ $(document).ready(function() {
         var sexo = $('#sexoFilter').val();
         var estadoSalud = $('#saludFilter').val();
 
-        console.log("Aplicando filtros:", {search, sexo, estadoSalud});
-
-        // Mostrar indicador de carga
         $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8"><i class="fas fa-spinner fa-spin fa-3x text-gray-300"></i><p class="text-gray-500 mt-2">Cargando...</p></td></tr>');
 
-        // Realizar petición AJAX
         $.ajax({
             url: '/bovinos/filtrar',
             method: 'GET',
@@ -77,8 +72,7 @@ $(document).ready(function() {
                 actualizarTabla(data);
                 actualizarEstadisticas();
             },
-            error: function(error) {
-                console.error("Error al filtrar:", error);
+            error: function() {
                 $('#bovinosTableBody').html('<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle fa-3x mb-3"></i><p>Error al cargar los datos</p></td></tr>');
             }
         });
@@ -95,15 +89,12 @@ $(document).ready(function() {
                 tbody.append(fila);
             });
 
-            // Aplicar animaciones a las nuevas filas
             $('.bovino-row').each(function(index) {
                 $(this).css('animation', `fadeIn 0.5s ease forwards ${index * 0.1}s`);
             });
 
-            // Actualizar contador de registros
             $('#totalRegistros').text(bovinos.length + ' registros mostrados');
         } else {
-            // Mostrar mensaje de sin resultados
             var noResultsRow = `
                 <tr class="no-results-row">
                     <td colspan="8" class="text-center py-8">
@@ -120,7 +111,7 @@ $(document).ready(function() {
         }
     }
 
-    // Función para crear una fila de la tabla - CON FECHA DE NACIMIENTO
+    // Función para crear una fila de la tabla - CORREGIDA CON ID
     function crearFilaBovino(bovino, index) {
         // Determinar clase para el badge de sexo
         var sexoClass = bovino.sexo === 'Macho' ? 'macho' : 'hembra';
@@ -129,8 +120,9 @@ $(document).ready(function() {
         // Determinar clase para el badge de estado
         var estadoClass = '';
         var estadoIcon = '';
+        var estadoSalud = bovino.estadoSalud || '';
 
-        switch(bovino.estadoSalud) {
+        switch(estadoSalud) {
             case 'Saludable':
                 estadoClass = 'saludable';
                 estadoIcon = 'fa-check-circle';
@@ -152,47 +144,48 @@ $(document).ready(function() {
                 estadoIcon = 'fa-question-circle';
         }
 
-        // Formatear fecha de nacimiento desde PostgreSQL (YYYY-MM-DD a DD/MM/YYYY)
+        // Formatear fecha de nacimiento
         var fechaNacimiento = '';
         if (bovino.fechaNacimiento) {
-            // PostgreSQL puede enviar la fecha como "2024-05-15" o "2024/05/15"
-            var fechaStr = bovino.fechaNacimiento;
+            try {
+                var fechaStr = bovino.fechaNacimiento.toString();
+                fechaStr = fechaStr.replace(/\//g, '-');
+                var fecha = new Date(fechaStr + 'T00:00:00');
 
-            // Reemplazar cualquier separador por - para trabajar con Date
-            fechaStr = fechaStr.replace(/\//g, '-');
-
-            // Crear objeto Date (formato YYYY-MM-DD)
-            var fecha = new Date(fechaStr + 'T00:00:00'); // Agregar T00:00:00 para evitar problemas de zona horaria
-
-            if (!isNaN(fecha.getTime())) {
-                var dia = fecha.getDate().toString().padStart(2, '0');
-                var mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                var anio = fecha.getFullYear();
-                fechaNacimiento = dia + '/' + mes + '/' + anio;
-            } else {
-                // Si no se puede parsear, mostrar como viene pero reemplazar / por - para consistencia
-                fechaNacimiento = bovino.fechaNacimiento.replace(/\//g, '-');
+                if (!isNaN(fecha.getTime())) {
+                    var dia = fecha.getDate().toString().padStart(2, '0');
+                    var mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                    var anio = fecha.getFullYear();
+                    fechaNacimiento = dia + '/' + mes + '/' + anio;
+                } else {
+                    fechaNacimiento = fechaStr.substring(0, 10);
+                }
+            } catch(e) {
+                fechaNacimiento = bovino.fechaNacimiento.toString().substring(0, 10);
             }
         } else {
             fechaNacimiento = '<span class="text-gray-400">—</span>';
         }
 
-        // Construir la fila - CON FECHA DE NACIMIENTO
+        // CORRECCIÓN: El ID viene como 'id' desde el backend con @JsonIgnoreProperties
+        var id = bovino.id || '';
+
+        // Construir la fila
         return '<tr class="bovino-row ' + (index % 2 === 0 ? '' : 'bg-gray-50') + ' hover:bg-gray-100">' +
-               '<td class="font-medium text-gray-900">' + (bovino.id || '') + '</td>' +
+               '<td class="font-medium text-gray-900">' + id + '</td>' +
                '<td>' + (bovino.codigoArete || '') + '</td>' +
                '<td class="font-semibold">' + (bovino.nombreBovino || '') + '</td>' +
                '<td><span class="sexo-badge ' + sexoClass + '">' +
                '<i class="fas ' + sexoIcon + ' mr-1"></i>' + (bovino.sexo || '') + '</span></td>' +
-               '<td class="font-medium">' + (bovino.peso ? bovino.peso.toFixed(1) : '0') + ' kg</td>' +
-               '<td class="text-gray-600">' + fechaNacimiento + '</td>' +  <!-- NUEVA CELDA -->
+               '<td class="font-medium">' + (bovino.peso ? parseFloat(bovino.peso).toFixed(1) : '0') + ' kg</td>' +
+               '<td class="text-gray-600">' + fechaNacimiento + '</td>' +
                '<td><span class="estado-badge">' +
                '<span class="' + estadoClass + '">' +
-               '<i class="fas ' + estadoIcon + ' mr-1"></i>' + (bovino.estadoSalud || '') + '</span>' +
+               '<i class="fas ' + estadoIcon + ' mr-1"></i>' + estadoSalud + '</span>' +
                '</span></td>' +
                '<td><div class="acciones-container">' +
-               '<a href="/bovinos/editar/' + bovino.id + '" class="btn-editar" title="Editar"><i class="fas fa-edit"></i></a>' +
-               '<a href="/bovinos/eliminar/' + bovino.id + '" class="btn-eliminar" title="Eliminar" onclick="return confirm(\'¿Estás seguro de eliminar este bovino?\')"><i class="fas fa-trash-alt"></i></a>' +
+               '<a href="/bovinos/editar/' + id + '" class="btn-editar" title="Editar"><i class="fas fa-edit"></i></a>' +
+               '<a href="/bovinos/eliminar/' + id + '" class="btn-eliminar" title="Eliminar" onclick="return confirm(\'¿Estás seguro de eliminar este bovino?\')"><i class="fas fa-trash-alt"></i></a>' +
                '</div></td></tr>';
     }
 
@@ -207,34 +200,23 @@ $(document).ready(function() {
                 $('#totalHembras').text(data.totalHembras || 0);
                 $('#totalSaludables').text(data.totalSaludables || 0);
                 $('#pesoPromedio').text((data.pesoPromedio || '0') + ' kg');
-            },
-            error: function(error) {
-                console.error("Error al actualizar estadísticas:", error);
             }
         });
     }
 
     // Función para mostrar notificaciones
     window.showNotification = function(message, type) {
-        // Crear elemento de notificación si no existe
         if ($('#notification-container').length === 0) {
             $('body').append('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
         }
 
-        let notification = $(`
-            <div class="notification ${type}" style="
-                background: white;
-                border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                padding: 1rem;
-                margin-bottom: 0.5rem;
-                border-radius: 0.375rem;
-                animation: slideInRight 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            ">
-                <i class="fas ${type === 'success' ? 'fa-check-circle text-green-500' : 'fa-exclamation-circle text-red-500'}"></i>
+        var borderColor = type === 'success' ? '#10b981' : '#ef4444';
+        var iconColor = type === 'success' ? 'text-green-500' : 'text-red-500';
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        var notification = $(`
+            <div class="notification ${type}" style="background: white; border-left: 4px solid ${borderColor}; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1rem; margin-bottom: 0.5rem; border-radius: 0.375rem; animation: slideInRight 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas ${icon} ${iconColor}"></i>
                 <span>${message}</span>
             </div>
         `);
@@ -257,7 +239,6 @@ $('<style>')
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
